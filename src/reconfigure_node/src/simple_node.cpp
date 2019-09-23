@@ -61,34 +61,21 @@ public:
     for(size_t i = 0; i < param_names.names.size(); ++i)
       params_names_vector[i] = param_names.names[i];
 
-    std::cout << "After client declaration" << std::endl;
-    for(auto& v : params_names_vector)
-      std::cout << this->get_parameter(v).get_name() << " - " << this->get_parameter(v).value_to_string() << std::endl;
-
     auto request = std::make_shared<rcl_interfaces::srv::SetParameters::Request>();
     auto param = rcl_interfaces::msg::Parameter();
-    param.name = "my_value";
-    param.value.type = 2;
-    param.value.integer_value = this->get_parameter("my_value").as_int();
 
-    // Ways to populate request message
-    // 1.
-    request->parameters.push_back(param);
-    // this->set_parameters("my_value", 12345);
+    std::cout << "After client declaration" << std::endl;
+    for(auto& v : params_names_vector)
+    {
+      std::cout << this->get_parameter(v).get_name() << " - " << this->get_parameter(v).value_to_string() << std::endl;
+      param.name = this->get_parameter(v).get_name();
+      param.value = this->get_parameter(v).get_value_message();
+      request->parameters.push_back(param);
+    }
 
-    // 2.
-    // request->parameters[0] = param;
-
-
-    // Ways to send parameters
-    // 1.
-    // client->async_send_request(request);
-
-    // 2
-    std::cout << "Just before sending parameters" << std::endl;
-    auto result_future = client->async_send_request(request);
-    std::cout << "Just after sending parameters" << std::endl;
-    std::cout << this->get_name() << " - " << this->get_parameter("my_value").as_int() << std::endl;
+    client->async_send_request(request);
+    this->timer_->cancel();
+    rclcpp::shutdown();
   }
 
 private:
@@ -103,11 +90,7 @@ int main(int argc, char * argv[])
   auto node = std::make_shared<SimpleNode>();
   rclcpp::executors::SingleThreadedExecutor exe;
   exe.add_node(node);
-  exe.spin_some();
-  // node->send_parameters();
   exe.spin();
-  // exe.spin_node_some(node->get_node_base_interface());
-  // rclcpp::spin(mynode);
   rclcpp::shutdown();
   return 0;
 }

@@ -58,23 +58,27 @@ public:
       RCLCPP_INFO(this->get_logger(), "AAA");
       
       auto my_value = this->get_parameter("my_value").as_int();
+      auto my_fdsa = this->get_parameter("fdsa").as_int();
+      auto my_asdf = this->get_parameter("asdf").as_int();
 
-      this->set_parameter({"asdf", my_value });
+      this->set_parameter({"my_value", my_value});
+      this->set_parameter({"fdsa", my_fdsa});
+      this->set_parameter({"asdf", my_asdf});
       RCLCPP_INFO(this->get_logger(), "My Value: '%i'", my_value);
       RCLCPP_INFO(this->get_logger(), "BBB");
       
-      auto client = this->create_client<rcl_interfaces::srv::SetParameters>("/cao/set_parameters");
-      auto request = std::make_shared<rcl_interfaces::srv::SetParameters::Request>();
-      auto param = rcl_interfaces::msg::Parameter();
-      param.name = "fdsa";
-      param.value.type = 2;
-      param.value.integer_value = my_value;
-      request->parameters.push_back(param);
+      // auto client = this->create_client<rcl_interfaces::srv::SetParameters>("/cao/set_parameters");
+      // auto request = std::make_shared<rcl_interfaces::srv::SetParameters::Request>();
+      // auto param = rcl_interfaces::msg::Parameter();
+      // param.name = "fdsa";
+      // param.value.type = 2;
+      // param.value.integer_value = my_value;
+      // request->parameters.push_back(param);
 
-      RCLCPP_INFO(this->get_logger(), "CCC");
+      // RCLCPP_INFO(this->get_logger(), "CCC");
       
-      client->async_send_request(request);
-      RCLCPP_INFO(this->get_logger(), "DDD");
+      // client->async_send_request(request);
+      // RCLCPP_INFO(this->get_logger(), "DDD");
     }
   }
 
