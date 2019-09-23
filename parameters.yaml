@@ -1,0 +1,4 @@
+cao:
+  ros__parameters:
+    my_value: 1000000
+    a_string: small_string
