@@ -39,8 +39,14 @@ public:
     count_(0)
   {
     std::cout << "Constructor called" << std::endl;
-    // this->declare_parameter<int>("my_value", 100);
-    
+
+    auto timer_callback =
+      [this]() -> void {this->sendParameters();};
+    timer_ = this->create_wall_timer(500ms, timer_callback);
+  }
+
+  void sendParameters()
+  {
     auto client = this->create_client<rcl_interfaces::srv::SetParameters>(std::string(this->get_name()) + "/set_parameters");
 
     auto param_names = this->list_parameters(
@@ -55,7 +61,7 @@ public:
     for(size_t i = 0; i < param_names.names.size(); ++i)
       params_names_vector[i] = param_names.names[i];
 
-    std::cout << "After client declaration" << std::endl; 
+    std::cout << "After client declaration" << std::endl;
     for(auto& v : params_names_vector)
       std::cout << this->get_parameter(v).get_name() << " - " << this->get_parameter(v).value_to_string() << std::endl;
 
@@ -64,10 +70,11 @@ public:
     param.name = "my_value";
     param.value.type = 2;
     param.value.integer_value = this->get_parameter("my_value").as_int();
-    // param.value.integer_value = 12345;
+
     // Ways to populate request message
     // 1.
     request->parameters.push_back(param);
+    // this->set_parameters("my_value", 12345);
 
     // 2.
     // request->parameters[0] = param;
@@ -80,19 +87,14 @@ public:
     // 2
     std::cout << "Just before sending parameters" << std::endl;
     auto result_future = client->async_send_request(request);
-    if (rclcpp::spin_until_future_complete(this->get_node_base_interface(), result_future) !=
-    rclcpp::executor::FutureReturnCode::SUCCESS)
-    {
-      RCLCPP_ERROR(this->get_logger(), "service call failed :(");
-    }
-    auto result = result_future.get();
-    std::cout << "Result: " << result->results[0].successful << std::endl;
-    std::cout << "After sending request" << std::endl;
+    std::cout << "Just after sending parameters" << std::endl;
     std::cout << this->get_name() << " - " << this->get_parameter("my_value").as_int() << std::endl;
   }
 
 private:
   size_t count_;
+  rclcpp::TimerBase::SharedPtr timer_;
+
 };
 
 int main(int argc, char * argv[])
